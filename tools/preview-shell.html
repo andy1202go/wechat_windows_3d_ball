@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>三维弹球 · 3D 台面预览</title>
+<style>
+  :root {
+    --bg: #0a0e16;
+    --panel: rgba(18, 24, 36, 0.94);
+    --line: #2a3448;
+    --text: #e8edf5;
+    --muted: #8d99ae;
+    --accent: #5b8cf0;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font: 13px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+          "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  }
+  #stage-wrap {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; height: 100%;
+  }
+  #stage {
+    display: block; border-radius: 8px;
+    box-shadow: 0 0 0 1px var(--line), 0 24px 60px rgba(0,0,0,0.55);
+    cursor: grab; touch-action: none;
+  }
+  #stage:active { cursor: grabbing; }
+  #readout {
+    position: absolute; left: 14px; top: 14px; margin: 0;
+    padding: 10px 13px; border-radius: 8px;
+    background: var(--panel); border: 1px solid var(--line);
+    font-size: 12px; font-variant-numeric: tabular-nums;
+    white-space: pre; color: var(--muted); pointer-events: none;
+  }
+  #panel {
+    position: absolute; right: 14px; top: 14px; width: 196px;
+    padding: 12px 14px 14px; border-radius: 8px;
+    background: var(--panel); border: 1px solid var(--line);
+  }
+  #panel .title { font-size: 13px; font-weight: 600; }
+  #panel .sub { color: var(--muted); font-size: 11px; margin: 2px 0 10px; }
+  #devices { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  #devices button, #btn-reset {
+    padding: 5px 9px; border-radius: 6px;
+    border: 1px solid var(--line); background: #141b29; color: var(--muted);
+    font-size: 12px; cursor: pointer; font-family: inherit;
+  }
+  #devices button:hover, #btn-reset:hover { border-color: #3d4d6b; color: var(--text); }
+  #devices button.on { border-color: var(--accent); background: #1b2a47; color: #fff; }
+  #btn-reset { width: 100%; }
+  #panel .hint { color: var(--muted); font-size: 11px; margin: 10px 0 0; }
+  kbd {
+    display: inline-block; padding: 0 4px; border-radius: 3px;
+    background: #1b2233; border: 1px solid var(--line); font-size: 10px;
+  }
+</style>
+</head>
+<body>
+  <div id="stage-wrap">
+    <canvas id="stage"></canvas>
+    <pre id="readout">加载中…</pre>
+
+    <div id="panel">
+      <div class="title">3D 台面预览</div>
+      <div class="sub">与 src/table、src/render 同一份代码</div>
+
+      <div id="devices"></div>
+      <button id="btn-reset">复位视角</button>
+
+      <p class="hint">
+        拖动旋转 · 滚轮缩放<br>
+        <kbd>←</kbd> <kbd>→</kbd> 或 <kbd>A</kbd> <kbd>D</kbd> 拍挡板
+      </p>
+    </div>
+  </div>
+<!--INJECT_SCRIPT-->
+</body>
+</html>

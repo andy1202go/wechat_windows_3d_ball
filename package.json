@@ -12,8 +12,10 @@
     "probe": "esbuild tools/probe-loop.ts --bundle --platform=node --format=cjs --target=node18 --outfile=.smoke/probe-loop.cjs --log-level=warning && node .smoke/probe-loop.cjs",
     "trace": "esbuild tools/trace-ball.ts --bundle --platform=node --format=cjs --target=node18 --outfile=.smoke/trace-ball.cjs --log-level=warning && node .smoke/trace-ball.cjs",
     "demo": "node tools/build-demo.mjs",
+    "preview": "node tools/build-preview.mjs",
+    "preview-check": "node tools/build-preview.mjs && esbuild tools/preview-harness.ts --bundle --platform=node --format=esm --target=node18 --outfile=.smoke/preview-harness.mjs --log-level=warning && node .smoke/preview-harness.mjs",
     "demo-check": "node tools/build-demo.mjs && esbuild tools/demo-harness.ts --bundle --platform=node --format=esm --target=node18 --outfile=.smoke/demo-harness.mjs --log-level=warning && node .smoke/demo-harness.mjs",
-    "verify": "npm run typecheck && npm run smoke && npm run demo-check && npm run build"
+    "verify": "npm run typecheck && npm run smoke && npm run demo-check && npm run preview-check && npm run build"
   },
   "dependencies": {
     "three": "0.117.0"

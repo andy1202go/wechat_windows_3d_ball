@@ -2,7 +2,11 @@
 
 复刻 Microsoft 3D Pinball: Space Cadet。
 
-当前进度：**M1（工程骨架 + 真机渲染验证）与 M2（物理核心）代码完成、自动化验证全绿**。M1 的真机确认仍是**阻断项**——它没通过之前，后面所有工作都建立在一个未验证的前提上。
+当前进度：**M1（工程骨架）与 M2（物理核心）代码完成、自动化验证全绿；M3 已由「台面几何校准」重定义为「台面重建」**（见 `docs/plan.md` 第八节）。
+
+台面重建的动因是：对照原版反编译资源后发现，当前台面的元素密度与美术水准都远低于原版（原版 18 个组件类、300 余盏灯，我们目前 2 类、0 盏灯）。为让美术改动有即时反馈，本轮先补了一个**浏览器 3D 预览**（`npm run preview`），它跑的是 `src/table` + `src/render` 的同一份代码。
+
+M1 的真机确认仍是**阻断项**——它没通过之前，后面所有工作都建立在一个未验证的前提上。
 
 - 架构决策 → `docs/adr/`
 - 领域术语（**台面**、**挡板**、**使命**、**军衔**…）→ `CONTEXT.md`
@@ -12,17 +16,19 @@
 
 ```bash
 npm install
-npm run verify      # 类型检查 + 冒烟测试 + 构建
+npm run verify      # 类型检查 + 冒烟测试 + 调试图验证 + 预览验证 + 构建
+npm run preview     # 生成 3D 台面预览 demo/preview.html（打开即可看）
 npm run demo        # 生成物理调试图 demo/index.html
 ```
 
-`npm run verify` 依次跑四件事：
+`npm run verify` 依次跑五件事：
 
 | 命令 | 作用 |
 |---|---|
 | `npm run typecheck` | `tsc --noEmit`，覆盖 `src/` 与 `tools/` |
 | `npm run smoke` | 在 Node 里用替身环境跑真实模块，验证 polyfill、台面几何管线、相机适配、主循环、物理求解器 |
-| `npm run demo-check` | 生成调试图并做无头验证（元素查找、渲染循环、输入链路） |
+| `npm run demo-check` | 生成物理调试图并做无头验证（元素查找、渲染循环、输入链路） |
+| `npm run preview-check` | 生成 3D 预览并做无头验证（渲染层不与小游戏 API 耦合、贴图确实画出来了） |
 | `npm run build` | 产出 `dist/polyfill.js` 与 `dist/app.js` |
 
 > 冒烟测试**不能替代真机验证**。WebGL 上下文创建、真实 GPU 的渲染结果、触摸事件坐标，这三样只能在真机上看。
@@ -34,6 +40,14 @@ npm run demo        # 生成物理调试图 demo/index.html
 它不是一份简化复制品，而是把 `src/physics/` 的同一份代码单独打包出来的。之所以能做到，是因为物理层有一条硬约束（`docs/adr/0003`）：不依赖 three.js、也不碰任何小游戏 API。代价是物理层不能顺手用 three 的向量类，收益是调手感时不用等小游戏构建、也不用真机预览。
 
 页面上能拨重力、围边弹性、挡板角速度、缓冲器推力，还能切到「无损模式」（关重力/阻尼、弹性取 1）来观察求解器本身会不会吞能量。左半屏/右半屏点击或 <kbd>←</kbd> <kbd>→</kbd> 拍挡板。
+
+## 3D 台面预览
+
+`npm run preview` 会生成 `demo/preview.html` —— 同样是单个自包含文件，打开就能看到**真正的 three.js 台面**，可拖动旋转、滚轮缩放、切换模拟机型、用方向键拍挡板。
+
+它跑的是 `src/table` + `src/render` 的同一份代码，只是把宿主从微信换成浏览器。之所以能这样做，是因为本次重构把 `src/render/texture.ts` 的画布来源改成了可注入的工厂——那是渲染层里唯一一处小游戏 API。见 `docs/adr/0010`。
+
+**它不替代真机验证。** WebGL 扩展支持、GPU 实际表现、着色器编译、触摸坐标都只能在真机上看。浏览器预览解决的是另一件事：改美术时立刻看得见。预览显式取 WebGL 1 与真机一致，读数里会标出实际拿到的版本——如果浏览器给的是 WebGL 2，读数会写明「真机不支持」，免得拿浏览器的效果去推断真机。
 
 ## 在微信开发者工具里跑
 
@@ -51,7 +65,8 @@ M1 的**唯一目的**是确认 three.js r117 + WebGL 1 在真机上渲染正常
 - [ ] 能看到深色台面，上窄下宽呈梯形（不是矩形，也不是上下颠倒的）
 - [ ] 贴图方向正确：橙色拱线在**远端**（画面上方），环形灯带在台面中部
 - [ ] 台面完整落在屏幕内、四周留白、没有被裁切
-- [ ] 3 个缓冲器（蓝柱 + 橙顶盖）、3 个击倒目标、3 个使命目标、2 个**反弹器**、左右挡板都在
+- [ ] 左右挡板都在，拍下去能抬起、松开能落回
+- [ ] 台面元素按当前 `src/table/data.ts` 的清单齐备（M3 重建前是「3 个缓冲器、6 个击倒目标」这一版；重建后应对齐 `CONTEXT.md` 里的原版骨架清单）
 - [ ] 调试面板 `WebGL2:` 一行显示 `no`
 - [ ] 调试面板 `GL:` 一行的版本串里不含 `WebGL 2` 字样
 - [ ] 触摸屏幕左半区左挡板抬起、右半区右挡板抬起、两指同时按能同时抬起
@@ -86,6 +101,7 @@ src/
   render/scene.ts      场景与灯光
   hud/debug.ts         自绘调试面板（小游戏无 WXML，UI 只能自绘）
   main.ts              入口装配
+  preview.ts           浏览器 3D 预览入口（把宿主从微信换成浏览器，非小游戏代码）
 
 tools/
   mock-env.ts          Node 替身环境（wx / 屏幕画布 / 2D 上下文 / 受控时钟）
@@ -94,10 +110,14 @@ tools/
   probe-loop.ts        主循环每帧步数分布 —— 定位时序类缺陷
   physics-demo.ts      物理调试图的逻辑
   demo-harness.ts      调试图的无头验证（DOM 替身，验证元素查找/循环/输入链路）
-  demo-shell.html       调试图的页面骨架
-  build-demo.mjs        把调试图打包成单个自包含 HTML
+  demo-shell.html      调试图的页面骨架
+  build-demo.mjs       把调试图打包成单个自包含 HTML
+  preview-harness.ts   预览的无头验证（注入画布工厂，验证渲染层不碰 wx）
+  preview-shell.html   预览页的页面骨架
+  build-preview.mjs    把预览打包成单个自包含 HTML
 
 demo/index.html        物理调试图（`npm run demo` 生成，构建产物）
+demo/preview.html      3D 台面预览（`npm run preview` 生成，构建产物）
 docs/adr/              架构决策记录
 CONTEXT.md             领域术语表
 docs/plan.md           实施计划 M1–M8
@@ -129,6 +149,8 @@ docs/plan.md           实施计划 M1–M8
 
 **10. 主包上限 4M，合计 30M。** 未压缩打包是 3.7M，一不留神就吃光预算。构建脚本默认压缩，需要调试时用 `npm run dev`。
 
+**11. 渲染层里唯一一处小游戏 API 是画布来源，它必须可注入。** `src/render/texture.ts` 原本直接调 `wx.createOffscreenCanvas` / `wx.createCanvas`，这一个人就让渲染层绑死在微信上，浏览器预览无从谈起。现在改为 `setCanvasFactory()` 注入：不注入时走 wx（小游戏真实路径），注入时走 `document.createElement('canvas')`（预览路径）。要留意的两点：一是注入必须发生在 `buildTable()` 之前，否则贴图已经用错误来源画完了；二是不注入且没有 wx 环境时应当**明确抛错**，而不是静默产出一张空白贴图——空白贴图在真机上看起来像「颜色配错了」，极难归因。见 `docs/adr/0010`。
+
 ## 构建命令
 
 | 命令 | 说明 |
@@ -140,6 +162,8 @@ docs/plan.md           实施计划 M1–M8
 | `npm run smoke` | Node 冒烟测试（含物理求解器断言） |
 | `npm run demo` | 生成 `demo/index.html` 物理调试图 |
 | `npm run demo-check` | 生成调试图并做无头验证 |
+| `npm run preview` | 生成 `demo/preview.html` 3D 台面预览 |
+| `npm run preview-check` | 生成预览并做无头验证（渲染层不碰 wx、贴图确实画出来） |
 | `npm run trace` | 跑一遍完整台面并输出球轨迹与命中统计 |
 | `npm run probe` | 输出主循环每帧的步数分布 |
-| `npm run verify` | 类型检查 + 冒烟测试 + 调试图验证 + 构建 |
+| `npm run verify` | 类型检查 + 冒烟测试 + 调试图验证 + 预览验证 + 构建（五步） |
