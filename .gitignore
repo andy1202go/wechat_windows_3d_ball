@@ -1,0 +1,8 @@
+node_modules/
+dist/
+# 物理调试图是构建产物，用 npm run demo 生成
+demo/
+.smoke/
+.Trash-0/
+project.private.config.json
+.DS_Store

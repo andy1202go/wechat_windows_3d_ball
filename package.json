@@ -1,0 +1,25 @@
+{
+  "name": "space-cadet-minigame",
+  "version": "0.1.0",
+  "private": true,
+  "description": "微信小游戏 — 3D Pinball: Space Cadet 复刻",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node build.mjs --dev",
+    "watch": "node build.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "smoke": "esbuild tools/smoke.ts --bundle --platform=node --format=cjs --target=node18 --outfile=.smoke/smoke.cjs --log-level=warning && node .smoke/smoke.cjs",
+    "probe": "esbuild tools/probe-loop.ts --bundle --platform=node --format=cjs --target=node18 --outfile=.smoke/probe-loop.cjs --log-level=warning && node .smoke/probe-loop.cjs",
+    "trace": "esbuild tools/trace-ball.ts --bundle --platform=node --format=cjs --target=node18 --outfile=.smoke/trace-ball.cjs --log-level=warning && node .smoke/trace-ball.cjs",
+    "demo": "node tools/build-demo.mjs",
+    "demo-check": "node tools/build-demo.mjs && esbuild tools/demo-harness.ts --bundle --platform=node --format=esm --target=node18 --outfile=.smoke/demo-harness.mjs --log-level=warning && node .smoke/demo-harness.mjs",
+    "verify": "npm run typecheck && npm run smoke && npm run demo-check && npm run build"
+  },
+  "dependencies": {
+    "three": "0.117.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.2",
+    "typescript": "^5.6.3"
+  }
+}

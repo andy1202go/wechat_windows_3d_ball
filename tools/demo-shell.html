@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>三维弹球 · 物理调试图（M2）</title>
+<style>
+  :root {
+    --bg: #f4f6fa;
+    --panel: #ffffff;
+    --line: #d8dee9;
+    --text: #1f2733;
+    --muted: #6b7686;
+    --accent: #2f5fd0;
+    --accent-soft: #eaf0fd;
+    --warn: #c0392b;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: flex;
+    background: var(--bg);
+    color: var(--text);
+    font: 13px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+          "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  }
+  #stage-wrap { flex: 1; position: relative; min-width: 0; }
+  #stage { display: block; width: 100%; height: 100%; }
+  #overlay {
+    position: absolute; left: 12px; top: 12px;
+    padding: 8px 12px; border-radius: 8px;
+    background: rgba(255,255,255,0.9);
+    border: 1px solid var(--line);
+    font-variant-numeric: tabular-nums;
+    white-space: pre; pointer-events: none;
+  }
+  #drained {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+    padding: 14px 22px; border-radius: 10px;
+    background: rgba(192,57,43,0.94); color: #fff;
+    font-size: 15px; font-weight: 600; display: none; pointer-events: none;
+  }
+  #panel {
+    width: 268px; flex: none; overflow-y: auto;
+    background: var(--panel); border-left: 1px solid var(--line);
+    padding: 16px;
+  }
+  h1 { font-size: 14px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 12px; margin-bottom: 14px; }
+  fieldset {
+    border: 1px solid var(--line); border-radius: 8px;
+    padding: 10px 12px 12px; margin: 0 0 12px;
+  }
+  legend { padding: 0 4px; color: var(--muted); font-size: 12px; }
+  .row { margin: 9px 0; }
+  .row label { display: flex; justify-content: space-between; font-size: 12px; }
+  .row output { color: var(--accent); font-variant-numeric: tabular-nums; }
+  input[type=range] { width: 100%; margin: 4px 0 0; accent-color: var(--accent); }
+  .check { display: flex; align-items: center; gap: 6px; font-size: 12px; margin: 8px 0 0; }
+  button {
+    width: 100%; padding: 8px; margin-top: 4px;
+    border: 1px solid var(--accent); border-radius: 7px;
+    background: var(--accent-soft); color: var(--accent);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  button:hover { background: #dde8fc; }
+  .hint { color: var(--muted); font-size: 12px; margin: 0; }
+  kbd {
+    display: inline-block; padding: 1px 5px; border-radius: 4px;
+    background: #eef1f6; border: 1px solid var(--line); font-size: 11px;
+  }
+  @media (max-width: 760px) {
+    body { flex-direction: column; }
+    #panel { width: auto; border-left: none; border-top: 1px solid var(--line); max-height: 45vh; }
+  }
+</style>
+</head>
+<body>
+  <div id="stage-wrap">
+    <canvas id="stage"></canvas>
+    <div id="overlay">加载中…</div>
+    <div id="drained">球已坠毁 · 按「重置球」重新开始</div>
+  </div>
+
+  <div id="panel">
+    <h1>物理调试图</h1>
+    <div class="sub">M2 · 与 src/physics 是同一份代码</div>
+
+    <fieldset>
+      <legend>手感参数</legend>
+      <div class="row">
+        <label>等效重力 <output id="out-gravity"></output></label>
+        <input type="range" id="in-gravity" min="0" max="300" step="5">
+      </div>
+      <div class="row">
+        <label>围边恢复系数 <output id="out-wall"></output></label>
+        <input type="range" id="in-wall" min="0.5" max="1" step="0.01">
+      </div>
+      <div class="row">
+        <label>挡板角速度 <output id="out-flipper"></output></label>
+        <input type="range" id="in-flipper" min="200" max="2000" step="20">
+      </div>
+      <div class="row">
+        <label>缓冲器推力 <output id="out-kick"></output></label>
+        <input type="range" id="in-kick" min="0" max="120" step="5">
+      </div>
+      <label class="check">
+        <input type="checkbox" id="in-lossless"> 无损模式（关重力/阻尼，弹性 = 1）
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>操作</legend>
+      <p class="hint">
+        触摸/点击左右半屏，或按 <kbd>←</kbd> <kbd>→</kbd> 拍挡板；<kbd>空格</kbd> 重置。
+      </p>
+      <button id="btn-reset">重置球</button>
+    </fieldset>
+
+    <fieldset>
+      <legend>为什么有这张图</legend>
+      <p class="hint">
+        物理层不依赖 three.js、也不碰小游戏 API（ADR-0003）。所以它能脱离渲染单独跑起来 ——
+        这张图就是那条约束的直接收益：手感的每一次调参都能在这里立刻看到，
+        而不用等三四十秒的小游戏构建与真机预览。
+      </p>
+    </fieldset>
+  </div>
+
+<!--INJECT_SCRIPT-->
+</body>
+</html>

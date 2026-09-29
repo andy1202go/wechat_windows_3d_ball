@@ -1,0 +1,18 @@
+{
+  "description": "Space Cadet 复刻 — 微信小游戏",
+  "projectname": "space-cadet-minigame",
+  "appid": "请在微信开发者工具里填入你的小游戏 AppID",
+  "compileType": "game",
+  "libVersion": "latest",
+  "setting": {
+    "es6": false,
+    "enhance": false,
+    "minified": false,
+    "postcss": false,
+    "urlCheck": false,
+    "coverView": false,
+    "checkInvalidKey": true,
+    "ignoreDevUnusedFiles": false
+  },
+  "condition": {}
+}
